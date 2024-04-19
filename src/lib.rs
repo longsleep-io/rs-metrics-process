@@ -3,7 +3,7 @@ mod collector;
 
 use std::sync::Arc;
 
-use metrics::{describe_gauge, gauge, Unit};
+use metrics::{counter, describe_counter, describe_gauge, gauge, Unit};
 
 /// Metrics names
 #[derive(Debug, PartialEq, Eq)]
@@ -107,7 +107,7 @@ impl Collector {
     pub fn describe(&self) {
         let metrics = self.metrics.as_ref();
 
-        describe_gauge!(
+        describe_counter!(
             Arc::clone(&metrics.cpu_seconds_total),
             Unit::Seconds,
             "Total user and system CPU time spent in seconds."
@@ -174,7 +174,7 @@ impl Collector {
         let metrics = self.metrics.as_ref();
         let mut m = collector::collect();
         if let Some(v) = m.cpu_seconds_total.take() {
-            gauge!(Arc::clone(&metrics.cpu_seconds_total)).set(v);
+            counter!(Arc::clone(&metrics.cpu_seconds_total)).absolute(v as u64);
         }
         if let Some(v) = m.open_fds.take() {
             gauge!(Arc::clone(&metrics.open_fds)).set(v as f64);
